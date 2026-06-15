@@ -1,3 +1,6 @@
+console.log("DEBUG SCRIPT VERSION 999");
+alert("DEBUG SCRIPT VERSION 999");
+
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzeyNsUjUp1ZGvJVGfg_ibW86JCfu7dJXyTYwBU77LMwF3eRqRMIIq21Org3aLcWIgyHg/exec";
 
 document.addEventListener("DOMContentLoaded", () => {
