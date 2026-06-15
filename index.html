@@ -3,40 +3,41 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>English Spelling Quiz</title>
+  <title>"English Spelling Quiz"</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">
-    <span class="bulb">💡</span>
+    <span class="bulb"></span>
   </button>
 
-  <main class="container">
+  <div id="timerDisplay" class="timer-display">"00:00:00:00"</div>
+
+  <div class="container">
+    <!-- LOGIN SCREEN -->
     <section id="loginScreen" class="screen active">
-      <h1 class="quiz-title">ENGLISH SPELLING QUIZ</h1>
+      <h1 class="quiz-title">"ENGLISH SPELLING QUIZ"</h1>
 
-      <form id="loginForm" class="login-form">
-        <input
-          type="text"
-          id="studentName"
-          placeholder="Full Name"
-          required
-        />
-        <input
-          type="text"
-          id="studentNumber"
-          placeholder="Student ID"
-          required
-        />
-        <button type="submit" class="start-btn">START</button>
-      </form>
-
-      <p id="loginMessage" class="message"></p>
+      <div class="login-form">
+        <input type="text" id="studentName" placeholder='"Enter your full name"' />
+        <input type="text" id="studentId" placeholder='"Enter your student ID"' />
+        <button id="startBtn" class="start-btn">"START"</button>
+        <p id="loginMessage" class="message"></p>
+      </div>
     </section>
 
+    <!-- LOADING SCREEN -->
+    <section id="loadingScreen" class="screen">
+      <div class="loading-wrap">
+        <div class="loading-ring"></div>
+        <div class="loading-text">"Loading"</div>
+      </div>
+    </section>
+
+    <!-- QUIZ SCREEN -->
     <section id="quizScreen" class="screen">
       <div class="quiz-header">
-        <h2 id="questionCounter">Question 1 / 20</h2>
+        <div id="questionCounter" class="question-counter">"1"</div>
       </div>
 
       <div class="question-box">
@@ -46,20 +47,26 @@
       <div id="optionsContainer" class="options-container"></div>
 
       <div class="nav-buttons">
-        <button id="prevBtn" class="nav-btn">Previous</button>
-        <button id="nextBtn" class="nav-btn">Next</button>
+        <button id="prevBtn" class="circle-nav-btn" aria-label="Previous question">←</button>
+        <button id="nextBtn" class="circle-nav-btn" aria-label="Next question">→</button>
       </div>
 
       <p id="quizMessage" class="message"></p>
     </section>
 
+    <!-- RESULT SCREEN -->
     <section id="resultScreen" class="screen">
-      <h2 class="result-title">Quiz Finished</h2>
+      <h2 class="result-title">"QUIZ COMPLETED"</h2>
       <p id="finalScore" class="result-text"></p>
       <p id="finalPercentage" class="result-text"></p>
       <p id="funMessage" class="fun-message"></p>
+      <p id="finalTimer" class="final-timer"></p>
     </section>
-  </main>
+  </div>
+
+  <audio id="bgMusic" loop preload="auto">
+    <source src="ambient.mp3" type="audio/mpeg" />
+  </audio>
 
   <script src="script.js"></script>
 </body>
