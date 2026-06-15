@@ -1,68 +1,94 @@
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzeyNsUjUp1ZGvJVGfg_ibW86JCfu7dJXyTYwBU77LMwF3eRqRMIIq21Org3aLcWIgyHg/exec";
 
 document.addEventListener("DOMContentLoaded", () => {
-  const loginScreen = document.getElementById("loginScreen");
-  const loadingScreen = document.getElementById("loadingScreen");
-  const quizScreen = document.getElementById("quizScreen");
-  const resultScreen = document.getElementById("resultScreen");
+  const $ = (selector) => document.querySelector(selector);
 
-  const studentNameInput = document.getElementById("studentName");
-  const studentIdInput = document.getElementById("studentId");
-  const startBtn = document.getElementById("startBtn");
+  const loginScreen = $("#loginScreen");
+  const loadingScreen = $("#loadingScreen");
+  const quizScreen = $("#quizScreen");
+  const resultScreen = $("#resultScreen");
 
-  const loginMessage = document.getElementById("loginMessage");
-  const quizMessage = document.getElementById("quizMessage");
+  const loginForm = $("#loginForm");
 
-  const questionCounter = document.getElementById("questionCounter");
-  const questionText = document.getElementById("questionText");
-  const optionsContainer = document.getElementById("optionsContainer");
+  const studentNameInput =
+    $("#studentName") ||
+    $('input[name="studentName"]') ||
+    $('input[placeholder*="name" i]');
 
-  const prevBtn = document.getElementById("prevBtn");
-  const nextBtn = document.getElementById("nextBtn");
+  const studentIdInput =
+    $("#studentId") ||
+    $('input[name="studentId"]') ||
+    $('input[placeholder*="student ID" i]') ||
+    $('input[placeholder*="id" i]');
 
-  const finalScore = document.getElementById("finalScore");
-  const finalPercentage = document.getElementById("finalPercentage");
-  const funMessage = document.getElementById("funMessage");
-  const finalTimer = document.getElementById("finalTimer");
+  const startBtn = $("#startBtn");
+  const loginMessage = $("#loginMessage");
+  const debugMessage = $("#debugMessage");
+  const quizMessage = $("#quizMessage");
 
-  const themeToggle = document.getElementById("themeToggle");
-  const timerDisplay = document.getElementById("timerDisplay");
-  const bgMusic = document.getElementById("bgMusic");
+  const questionCounter = $("#questionCounter");
+  const questionText = $("#questionText");
+  const optionsContainer = $("#optionsContainer");
 
-  if (
-    !loginScreen ||
-    !loadingScreen ||
-    !quizScreen ||
-    !resultScreen ||
-    !studentNameInput ||
-    !studentIdInput ||
-    !startBtn ||
-    !loginMessage ||
-    !quizMessage ||
-    !questionCounter ||
-    !questionText ||
-    !optionsContainer ||
-    !prevBtn ||
-    !nextBtn ||
-    !finalScore ||
-    !finalPercentage ||
-    !funMessage ||
-    !finalTimer ||
-    !themeToggle ||
-    !timerDisplay
-  ) {
-    console.error("Some required HTML elements were not found.");
-    alert("HTML and JavaScript are not connected correctly.");
+  const prevBtn = $("#prevBtn");
+  const nextBtn = $("#nextBtn");
+
+  const finalScore = $("#finalScore");
+  const finalPercentage = $("#finalPercentage");
+  const funMessage = $("#funMessage");
+  const finalTimer = $("#finalTimer");
+
+  const themeToggle = $("#themeToggle");
+  const timerDisplay = $("#timerDisplay");
+  const bgMusic = $("#bgMusic");
+
+  function setDebug(text) {
+    if (debugMessage) {
+      debugMessage.textContent = text;
+    }
+    console.log(text);
+  }
+
+  setDebug("script loaded");
+
+  if (loginForm) {
+    loginForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      startQuizFlow();
+    });
+  }
+
+  if (themeToggle) {
+    themeToggle.addEventListener("click", () => {
+      document.body.classList.toggle("dark");
+    });
+  }
+
+  if (studentIdInput) {
+    studentIdInput.addEventListener("input", () => {
+      studentIdInput.value = studentIdInput.value.replace(/[^\d]/g, "");
+    });
+  }
+
+  if (!startBtn) {
+    alert("Start button not found in HTML.");
+    return;
+  }
+
+  startBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    startQuizFlow();
+  });
+
+  if (!loginScreen || !loadingScreen || !quizScreen || !resultScreen) {
+    alert("Main screens not found in HTML.");
     return;
   }
 
   let questions = [];
   let currentQuestionIndex = 0;
   let selectedAnswers = [];
-  let currentStudent = {
-    name: "",
-    id: ""
-  };
+  let currentStudent = { name: "", id: "" };
 
   let timerInterval = null;
   let quizStartTime = null;
@@ -70,34 +96,34 @@ document.addEventListener("DOMContentLoaded", () => {
   let autoAdvanceLock = false;
   let typingTimeout = null;
 
-  themeToggle.addEventListener("click", () => {
-    document.body.classList.toggle("dark");
-  });
-
-  startBtn.addEventListener("click", startQuizFlow);
-  prevBtn.addEventListener("click", goToPreviousQuestion);
-  nextBtn.addEventListener("click", goToNextQuestionManual);
-
-  studentIdInput.addEventListener("input", () => {
-    studentIdInput.value = studentIdInput.value.replace(/[^\d]/g, "");
-  });
+  function readSafeValue(input) {
+    if (!input) return "";
+    return String(input.value || "").trim();
+  }
 
   async function startQuizFlow() {
-    if (!studentNameInput || !studentIdInput || !loginMessage) {
-      alert("Input elements are missing.");
+    const name = readSafeValue(studentNameInput);
+    const studentId = readSafeValue(studentIdInput);
+
+    setDebug(`name="${name}" | id="${studentId}"`);
+
+    if (loginMessage) loginMessage.textContent = "";
+
+    if (!studentNameInput) {
+      if (loginMessage) loginMessage.textContent = "Name input not found.";
+      setDebug("Name input element is missing.");
       return;
     }
 
-    const name = studentNameInput.value.trim();
-    const studentId = studentIdInput.value.trim();
-
-    console.log("Name:", name);
-    console.log("ID:", studentId);
-
-    loginMessage.textContent = "";
+    if (!studentIdInput) {
+      if (loginMessage) loginMessage.textContent = "Student ID input not found.";
+      setDebug("Student ID input element is missing.");
+      return;
+    }
 
     if (name === "" || studentId === "") {
-      loginMessage.textContent = "Student name and student number are required.";
+      if (loginMessage) loginMessage.textContent = "Student name and student number are required.";
+      setDebug("Input values are empty when Start was clicked.");
       return;
     }
 
@@ -116,16 +142,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
       selectedAnswers = new Array(questions.length).fill(null);
       currentQuestionIndex = 0;
-      quizMessage.textContent = "";
+
+      if (quizMessage) quizMessage.textContent = "";
 
       startTimer();
-
       showScreen("quiz");
       renderQuestion();
     } catch (error) {
-      console.error("Start quiz error:", error);
+      console.error(error);
       showScreen("login");
-      loginMessage.textContent = error.message || "Something went wrong while starting the quiz.";
+      if (loginMessage) {
+        loginMessage.textContent =
+          error.message || "Something went wrong while starting the quiz.";
+      }
+      setDebug(`start error: ${error.message || error}`);
     }
   }
 
@@ -146,8 +176,9 @@ document.addEventListener("DOMContentLoaded", () => {
       throw new Error("Please set your Google Apps Script Web App URL in script.js");
     }
 
-    const url = `${WEB_APP_URL}?action=checkStudent&studentId=${encodeURIComponent(studentId)}`;
-    const response = await fetch(url);
+    const response = await fetch(
+      `${WEB_APP_URL}?action=checkStudent&studentId=${encodeURIComponent(studentId)}`
+    );
 
     if (!response.ok) {
       throw new Error("Could not verify student eligibility.");
@@ -161,8 +192,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function fetchQuestions() {
-    const url = `${WEB_APP_URL}?action=getQuestions`;
-    const response = await fetch(url);
+    const response = await fetch(`${WEB_APP_URL}?action=getQuestions`);
 
     if (!response.ok) {
       throw new Error("Could not load questions.");
@@ -178,7 +208,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function renderQuestion() {
-    quizMessage.textContent = "";
+    if (!questionText || !optionsContainer || !questionCounter) return;
 
     const question = questions[currentQuestionIndex];
     const number = currentQuestionIndex + 1;
@@ -187,8 +217,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const rawText = typeof question.question === "string" ? question.question : "";
     const displayText = `${number} < ${rawText}`;
-    typeWriter(questionText, displayText, 32);
 
+    typeWriter(questionText, displayText, 32);
     optionsContainer.innerHTML = "";
 
     const options = [
@@ -221,7 +251,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     selectedAnswers[currentQuestionIndex] = optionText;
     highlightSelectedOption(optionText);
-
     autoAdvanceLock = true;
 
     setTimeout(() => {
@@ -231,33 +260,35 @@ document.addEventListener("DOMContentLoaded", () => {
       } else {
         submitQuiz();
       }
-
       autoAdvanceLock = false;
     }, 260);
   }
 
   function highlightSelectedOption(optionText) {
-    const optionButtons = document.querySelectorAll(".option-btn");
-
-    optionButtons.forEach((btn) => {
+    const buttons = document.querySelectorAll(".option-btn");
+    buttons.forEach((btn) => {
       btn.classList.toggle("selected", btn.textContent === optionText);
     });
   }
 
-  function goToPreviousQuestion() {
-    if (currentQuestionIndex > 0) {
-      currentQuestionIndex -= 1;
-      renderQuestion();
-    }
+  if (prevBtn) {
+    prevBtn.addEventListener("click", () => {
+      if (currentQuestionIndex > 0) {
+        currentQuestionIndex -= 1;
+        renderQuestion();
+      }
+    });
   }
 
-  function goToNextQuestionManual() {
-    if (currentQuestionIndex < questions.length - 1) {
-      currentQuestionIndex += 1;
-      renderQuestion();
-    } else {
-      submitQuiz();
-    }
+  if (nextBtn) {
+    nextBtn.addEventListener("click", () => {
+      if (currentQuestionIndex < questions.length - 1) {
+        currentQuestionIndex += 1;
+        renderQuestion();
+      } else {
+        submitQuiz();
+      }
+    });
   }
 
   async function submitQuiz() {
@@ -287,24 +318,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
       stopTimer();
 
-      finalScore.textContent = `Score: ${data.score} / ${data.total}`;
-      finalPercentage.textContent = `Percentage: ${data.percentage}%`;
-      funMessage.textContent = getFunMessage(data.percentage);
-      finalTimer.textContent = `Time: ${finalElapsedTime}`;
-      finalTimer.classList.add("stopped");
+      if (finalScore) finalScore.textContent = `Score: ${data.score} / ${data.total}`;
+      if (finalPercentage) finalPercentage.textContent = `Percentage: ${data.percentage}%`;
+      if (funMessage) funMessage.textContent = getFunMessage(data.percentage);
+      if (finalTimer) {
+        finalTimer.textContent = `Time: ${finalElapsedTime}`;
+        finalTimer.classList.add("stopped");
+      }
 
-      timerDisplay.classList.remove("active");
+      if (timerDisplay) timerDisplay.classList.remove("active");
       showScreen("result");
     } catch (error) {
-      console.error("Submit quiz error:", error);
+      console.error(error);
       showScreen("quiz");
-      quizMessage.textContent = error.message || "Submission failed.";
+      if (quizMessage) quizMessage.textContent = error.message || "Submission failed.";
     }
   }
 
   function getFunMessage(percentage) {
     const score = Number(percentage);
-
     if (score === 100) return "Perfect. Suspiciously perfect, honestly.";
     if (score >= 80) return "Excellent. Your dictionary is probably proud of you.";
     if (score >= 60) return "Not bad at all. Civilized performance.";
@@ -333,21 +365,20 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function startTimer() {
-    finalTimer.classList.remove("stopped");
+    if (!timerDisplay) return;
+
+    if (finalTimer) finalTimer.classList.remove("stopped");
+
     quizStartTime = Date.now();
     timerDisplay.classList.add("active");
     updateTimer();
 
-    if (timerInterval) {
-      clearInterval(timerInterval);
-    }
-
+    if (timerInterval) clearInterval(timerInterval);
     timerInterval = setInterval(updateTimer, 10);
   }
 
   function updateTimer() {
-    if (!quizStartTime) return;
-
+    if (!quizStartTime || !timerDisplay) return;
     const elapsed = Date.now() - quizStartTime;
     finalElapsedTime = formatElapsedTime(elapsed);
     timerDisplay.textContent = finalElapsedTime;
